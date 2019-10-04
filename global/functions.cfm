@@ -10,4 +10,22 @@ if (StructKeyExists(server, "lucee")) {
 	// TODO: Check this doesn't break when in a subdir?
 	include "/global/logging.cfm";
 }
+
+/**
+	 *
+	 * adds support for DCE compliant guid in coldfusion
+	 *
+	 * [section: Utility]
+	 * [category: Global]
+	 * 
+	 */
+	public string function createGenericGUID() {
+	    if (structKeyExists(server, "lucee")) {
+	        return createGUID();
+	    } else {
+	    	var uuidLibObj = createobject("java", "java.util.UUID");
+
+   			return uuidLibObj.randomUUID().toString();
+	    }
+	}
 </cfscript>

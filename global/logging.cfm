@@ -4,51 +4,97 @@
 //=====================================================================
 
 /**
-* Adds a logline to the Audit Log: doesn't log anything in testing mode
+* Add a info log 
+* [section: Application]
+* [category: Utils]
+*
+* @methodName Method name that log this information. (required field)
+* @logMessage The Message (required field)
+*/
+public void function addInfoLog(required string methodName="", required string logMessage=""){
+		
+		var log = model("msaTesterLogs").new();
+
+		log.logType = "INFO";
+		log.methodName = methodName;
+		log.logMessage = logMessage;
+		log.severity = 1; //info log severity 
+		log.processStart = now();
+		log.isSucceed = 0; // not applicable
+
+		if(!log.save()){
+				message = log.allErrors()[1];
+				throw(serialize(message));
+		}
+}
+
+
+/**
+* Adds an error log
 *
 * [section: Application]
 * [category: Utils]
 *
-* @logtype Anything you want to group by: i.e, info | debug | error etc.
-* @message The Message
-* @severity One of normal | warning | fatal
+* @methodName Method name that log this information. (required field)
+* @logMessage The Message (required field)
+* @userName The user name if available
+* @companyName The company name if available
+* @companyId The company id if available
 */
-public void function addLogLine(required string logtype="INFO",  required string methodName="", required string logMessage="", string severity="normal", string userName="", string companyName="", numeric companySize=1, datetime processStart=0, numeric success=0, numeric duration=0){
-		//local.newLogLine=model("msatesterlog").create(arguments);
+public void function addErrorLog(required string methodName="", required string logMessage="", string userName="", string companyName="", numeric companyId){
+	
 		var log = model("msaTesterLogs").new();
-		log.logType = uCase(logtype);
+	
+		log.logType = "ERROR";
 		log.methodName = methodName;
 		log.logMessage = logMessage;
-		var sev = 1;
-		if(CompareNoCase(severity, "fatal") == 0 ){
-			sev =3;
-		}else if(CompareNoCase(severity, "warning") == 0){
-			sev = 2;
+		log.severity = 3; //error log severity is 3 right now  
+		log.isSucceed = -1; //error occured
+		log.userName = isDefined("userName") ? userName : "";
+		log.companyName = isDefined("companyName") ? companyName  : "";
+		log.companyId = isDefined("companyId") ? companyId  : "";
+		log.processStart = now();
+	
+		if(!log.save()){
+				message = log.allErrors()[1];
+				throw(serialize(message));
 		}
-		log.severity = sev;
-		log.userName = userName;
-		log.companyName = companyName;
+}
 
-		switch (companySize) {
-			case 1:
-				log.companySize 	= "1 to 10 employees";
-				break;
-			case 11:
-				log.companySize 	= "11 to 50 employees";
-				break;
-			case 51:
-				log.companySize 	= "51 to 100 employees";
-				break;
-			case 100:
-				log.companySize 	= "More than 100 employees";
-				break;
-			default:
-				log.companySize 	= "NA";
-				break;
-		}
-		log.processStart = processStart == 0 ? now() : processStart;
-		log.success = success;
-		log.duration = duration;
+
+/**
+* Adds a debug log for saving data. which can be used later on to present 
+*
+* [section: Application]
+* [category: Utils]
+*
+* @methodName Method name that log this information. (required field)
+* @logMessage The Message (required field)
+* @userName The user name if available
+* @companyName The company name if available
+* @companyId The company id if available
+* @processStart The time when process start
+* @isSucceed Is the process succeed
+* @operationType The operation type: httppost | httpget | db
+* @duration The duration took for processing the work
+
+*/
+public void function addDebugLog(required string methodName="", required string logMessage="",  string userName="", string companyName="", numeric companyId, datetime processStart, numeric isSucceed, string operationType, numeric duration){
+
+		var log = model("msaTesterLogs").new();
+		
+		log.logType = "DEBUG";
+		log.methodName = methodName;
+		log.logMessage = logMessage;
+		log.severity = 1;
+		log.userName = isDefined("userName") ? userName : "";
+		log.companyName = isDefined("companyName") ? companyName  : "";
+		log.companyId = isDefined("companyId") ? companyId  : -1;
+
+		log.processStart = isDefined("processStart") ? processStart : now();
+		log.isSucceed = isDefined("isSucceed") ? isSucceed : 0;
+		log.operationType = isDefined("operationType") ? operationType : "";
+		log.duration = isDefined("duration") ? duration : 0;
 		if(!log.save()){
 				message = log.allErrors()[1];
 				throw(serialize(message));

@@ -5,5 +5,5 @@
 	// Examples:
 	// this.name = "MyAppName";
 	// this.sessionTimeout = CreateTimeSpan(0,0,5,0);
-
+bufferoutput = true;
 </cfscript>
